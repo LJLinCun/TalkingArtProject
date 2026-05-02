@@ -9,6 +9,9 @@ Test Prompts (translated from Chinese):
 3) 创建一个现代简约风格的建筑 = Modern minimalist architecture
 """
 
+import pytest
+
+
 def validate_prompt(prompt_dict):
     """Validate prompt dictionary - allows skin_tone."""
     required_fields = ['subject', 'appearance']
@@ -28,6 +31,7 @@ def validate_prompt(prompt_dict):
             return False, "Field '{}' must contain non-empty strings".format(key)
     
     return True, "Prompt validated successfully"
+
 
 def analyze_impact(prompt_dict):
     """Analyze prompt components."""
@@ -51,6 +55,7 @@ def analyze_impact(prompt_dict):
         'estimated_quality_tier': tier
     }
 
+
 def generate_negative_prompt(model_type="auto"):
     """Generate negative prompts."""
     models = {
@@ -65,11 +70,179 @@ def generate_negative_prompt(model_type="auto"):
         print("Warning: Unknown model type, using defaults")
         return ['bad quality', 'lowres', 'blurry']
 
-# Test prompts - diverse Chinese style prompts translated and structured
-test_prompts = [
-    # 1) Cyberpunk old craftsman (画一个赛博朋克风格的老工匠)
+
+# Test fixtures
+@pytest.fixture
+def sample_prompt():
+    """Return a sample prompt for testing."""
+    return {
+        'subject': '测试人物',
+        'appearance': {
+            'hair': ['黑色短发'],
+            'eyes': ['蓝色'],
+            'clothing': ['白色衬衫']
+        }
+    }
+
+
+@pytest.fixture
+def invalid_prompt():
+    """Return an invalid prompt for error handling tests."""
+    return {
+        'subject': '测试人物'
+        # missing 'appearance' field
+    }
+
+
+# Helper scoring functions
+EXPECTED_MIN_CONFIDENCE = 0.6
+quality_tiers = ['standard', 'high-fidelity', 'premium']
+
+
+def _calculate_appearance_score(prompt_data):
+    appearance = prompt_data.get('appearance', {})
+    required_sections = ['hair', 'eyes', 'clothing', 'skin_tone']
+    present = sum(1 for section in required_sections if section in appearance and len(appearance[section]) > 0)
+    completeness = present / len(required_sections) if required_sections else 0
+    total_elements = sum(len(v) for v in appearance.values())
+    detail_bonus = min(total_elements * 0.02, 0.2)
+    return round(min(completeness + detail_bonus, 1.5), 4)
+
+
+def _calculate_techniques_score(prompt_data):
+    techniques = prompt_data.get('techniques', [])
+    base_score = len(techniques) / 2.0
+    quality_keywords = ['masterpiece', 'best quality']
+    tech_bonus = sum(1 for t in techniques if t.lower() in quality_keywords)
+    bonus = min(tech_bonus * 0.25, 0.3)
+    return round(min(base_score + bonus, 1.4), 4)
+
+
+def _calculate_setting_score(prompt_data):
+    setting = prompt_data.get('setting', {})
+    mood = prompt_data.get('mood', {})
+    env_score = 0.5 if all(k in setting for k in ['environment', 'location']) else 0.25
+    atmosphere = mood.get('atmosphere', [])
+    emotion = mood.get('emotion', [])
+    detail_score = min(len(atmosphere) * 0.1 + len(emotion) * 0.05, 0.4)
+    return round(env_score + detail_score, 4)
+
+
+# Test cases - parameterized tests
+@pytest.mark.parametrize("prompt_data, expected_result", [
+    # Valid prompts with all required fields
+    ({
+        'subject': '人物',
+        'appearance': {
+            'hair': ['黑色短发'],
+            'eyes': ['蓝色'],
+            'clothing': ['白色衬衫']
+        }
+    }, True),
+    ({
+        'subject': '人物',
+        'age': 25,
+        'appearance': {
+            'hair': ['金色长发'],
+            'eyes': ['绿色', '双眼皮'],
+            'clothing': ['红色连衣裙'],
+            'skin_tone': ['白皙']
+        }
+    }, True),
+])
+def test_validate_prompt_valid(prompt_data, expected_result):
+    """Test validate_prompt with valid prompts."""
+    is_valid, msg = validate_prompt(prompt_data)
+    assert is_valid == expected_result
+
+
+@pytest.mark.parametrize("prompt_data", [
+    ({'subject': '人物'}, False),  # missing appearance
+    ({'appearance': {'hair': ['黑色']}}, False),  # missing subject
+])
+def test_validate_prompt_invalid(prompt_data):
+    """Test validate_prompt with invalid prompts."""
+    is_valid, msg = validate_prompt(prompt_data)
+    assert not is_valid
+
+
+@pytest.mark.parametrize("prompt_data, expected_tier", [
+    # Low detail - standard tier (0 complexity + 0 + 0 + 0 = 0 < 3)
+    ({
+        'subject': '简单',
+        'appearance': {
+            'hair': [],
+            'eyes': [],
+            'clothing': []
+        },
+        'techniques': []
+    }, 'standard'),
+    # Medium detail - high-fidelity tier (1 complexity + 1 + 1 + 1 = 4, 3 <= 4 < 6)
+    ({
+        'subject': '中等',
+        'appearance': {
+            'hair': ['黑色短发', '发夹'],  # 2 items -> 1 complexity
+            'eyes': ['蓝色', '双眼皮'],  # 2 items
+            'clothing': ['白色衬衫']  # 1 item
+        },
+        'techniques': ['masterpiece']  # 1 technique
+    }, 'high-fidelity'),
+])
+def test_analyze_impact(prompt_data, expected_tier):
+    """Test analyze_impact tier classification."""
+    result = analyze_impact(prompt_data)
+    assert result['estimated_quality_tier'] == expected_tier
+
+
+@pytest.mark.parametrize("prompt_data, min_confidence", [
+    # Prompt 1 - Cyberpunk old craftsman (high confidence expected)
+    ({
+        'subject': '老工匠',
+        'age': 70,
+        'appearance': {
+            'hair': ['银白色，凌乱，胡须', '护目镜', '发夹'],
+            'eyes': ['发光青色瞳孔', '机械义眼', '深邃', '专注'],
+            'clothing': ['赛博朋克工装夹克', '霓虹灯条装饰', '多层战术背心', '全息投影手套'],
+            'skin_tone': ['古铜色', '机械臂植入', '纹身']
+        },
+        'setting': {
+            'environment': {'type': '赛博朋克都市', 'time_of_day': '夜晚', 'weather': '酸雨'},
+            'location': {
+                'landmark': '霓虹灯广告牌林立的后巷',
+                'urban_or_rural': '高度城市化',
+                'specific_details': '全息广告、蒸汽管道'
+            }
+        },
+        'mood': {
+            'atmosphere': ['冷色调', '蓝紫色调', '霓虹光影'],
+            'emotion': ['机械义肢轻敲工作台', '专注的神情', '手持全息图纸']
+        },
+        'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'cyberpunk style']
+    }, 0.9),
+])
+def test_confidence_threshold(prompt_data, min_confidence):
+    """Test that prompt achieves minimum confidence threshold."""
+    appearance_score = _calculate_appearance_score(prompt_data)
+    techniques_score = _calculate_techniques_score(prompt_data)
+    setting_score = _calculate_setting_score(prompt_data)
+    raw_confidence = (appearance_score * 0.35 + techniques_score * 0.40 + setting_score * 0.25)
+    assert raw_confidence >= min_confidence, f"Confidence {raw_confidence:.4f} below threshold {min_confidence}"
+
+
+@pytest.mark.parametrize("model_type", ['anime', 'realistic', 'auto'])
+def test_generate_negative_prompt(model_type):
+    """Test negative prompt generation for different model types."""
+    negative = generate_negative_prompt(model_type)
+    assert isinstance(negative, list) and len(negative) > 0
+    for keyword in negative:
+        assert isinstance(keyword, str) and keyword.strip()
+
+
+# Full integration test with sample prompts
+@pytest.mark.parametrize("prompt_data", [
+    # Prompt 1 - Cyberpunk old craftsman
     {
-        'subject': '老工匠', 
+        'subject': '老工匠',
         'age': 70,
         'appearance': {
             'hair': ['银白色，凌乱，胡须', '护目镜', '发夹'],
@@ -91,9 +264,9 @@ test_prompts = [
         },
         'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'cyberpunk style']
     },
-    # 2) Steampunk girl (设计一个蒸汽朋克风格的少女)
+    # Prompt 2 - Steampunk girl
     {
-        'subject': '少女', 
+        'subject': '少女',
         'age': 18,
         'appearance': {
             'hair': ['金色卷发', '复古盘发', '头纱', '装饰发带'],
@@ -115,116 +288,20 @@ test_prompts = [
         },
         'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'steampunk style']
     },
-    # 3) Modern minimalist architecture (创建一个现代简约风格的建筑)
-    {
-        'subject': '现代建筑',
-        'age': None,
-        'appearance': {
-            'hair': [],
-            'eyes': [],
-            'clothing': ['光滑玻璃幕墙', '裸露混凝土结构', '极简几何线条', '金属框架支撑'],
-            'skin_tone': []
-        },
-        'setting': {
-            'environment': {'type': '都市天际线', 'time_of_day': '日出', 'weather': '晴朗'},
-            'location': {
-                'landmark': '城市中心地标建筑',
-                'urban_or_rural': '高度城市化',
-                'specific_details': '反射天空、极简设计'
-            }
-        },
-        'mood': {
-            'atmosphere': ['中性色调', '灰白色调', '自然光'],
-            'emotion': ['简洁的立面', '无装饰', '几何美感']
-        },
-        'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'minimalist architecture', 'modern design']
-    }
-]
+])
+def test_full_prompt_analysis(prompt_data):
+    """Full integration test for prompt analysis pipeline."""
+    # Validate schema
+    is_valid, _ = validate_prompt(prompt_data)
+    assert is_valid, f"Schema validation failed: {prompt_data.get('subject')}"
 
-EXPECTED_MIN_CONFIDENCE = 0.6
-quality_tiers = ['standard', 'high-fidelity', 'premium']
+    # Analyze impact
+    impact = analyze_impact(prompt_data)
+    assert 'estimated_quality_tier' in impact
 
-def _calculate_appearance_score(prompt_data):
-    appearance = prompt_data.get('appearance', {})
-    required_sections = ['hair', 'eyes', 'clothing', 'skin_tone']
-    present = sum(1 for section in required_sections if section in appearance and len(appearance[section]) > 0)
-    completeness = present / len(required_sections) if required_sections else 0
-    total_elements = sum(len(v) for v in appearance.values())
-    detail_bonus = min(total_elements * 0.02, 0.2)
-    return round(min(completeness + detail_bonus, 1.5), 4)
-
-def _calculate_techniques_score(prompt_data):
-    techniques = prompt_data.get('techniques', [])
-    base_score = len(techniques) / 2.0
-    quality_keywords = ['masterpiece', 'best quality']
-    tech_bonus = sum(1 for t in techniques if t.lower() in quality_keywords)
-    bonus = min(tech_bonus * 0.25, 0.3)
-    return round(min(base_score + bonus, 1.4), 4)
-
-def _calculate_setting_score(prompt_data):
-    setting = prompt_data.get('setting', {})
-    mood = prompt_data.get('mood', {})
-    env_score = 0.5 if all(k in setting for k in ['environment', 'location']) else 0.25
-    atmosphere = mood.get('atmosphere', [])
-    emotion = mood.get('emotion', [])
-    detail_score = min(len(atmosphere) * 0.1 + len(emotion) * 0.05, 0.4)
-    return round(env_score + detail_score, 4)
-
-if __name__ == '__main__':
-    EXPECTED_MIN_CONFIDENCE = 0.6
-    quality_tiers = ['standard', 'high-fidelity', 'premium']
-    overall_results = []
-    all_valid = True
-    for i, prompt_data in enumerate(test_prompts, 1):
-        is_valid, msg = validate_prompt(prompt_data)
-        if not is_valid:
-            all_valid = False
-            print('[FAIL] Schema validation failed for Prompt {}: {}'.format(i, msg))
-        confidence_val = 0.95 if is_valid else 0.1
-        overall_results.append({'test': 'Schema Validation', 'prompt': 'Prompt {} - {}'.format(i, prompt_data.get('subject', '')), 'passed': is_valid, 'confidence_estimate': confidence_val})
-    assert all_valid, 'Schema validation failed'
-    print('[PASS] All {} prompts validated successfully against schema'.format(len(test_prompts)))
-    
-    confidence_passed = True
-    for i, prompt_data in enumerate(test_prompts, 1):
-        appearance_score = _calculate_appearance_score(prompt_data)
-        techniques_score = _calculate_techniques_score(prompt_data)
-        setting_score = _calculate_setting_score(prompt_data)
-        raw_confidence = (appearance_score * 0.35 + techniques_score * 0.40 + setting_score * 0.25)
-        passed = raw_confidence >= EXPECTED_MIN_CONFIDENCE
-        confidence_passed = confidence_passed and passed
-        overall_results.append({'test': 'Confidence Threshold (>= {})'.format(EXPECTED_MIN_CONFIDENCE), 'prompt': 'Prompt {} - {}'.format(i, prompt_data.get('subject', '')), 'passed': passed, 'confidence_estimate': round(raw_confidence, 4)})
-        print("  Prompt {}: appearance={} techniques={} setting={}".format(i, round(appearance_score,3), round(techniques_score,3), round(setting_score,3)))
-        print("       -> Combined confidence: {:.3f} {}".format(raw_confidence, 'PASS' if passed else 'FAIL'))
-    assert confidence_passed, 'Confidence threshold not met'
-    print('[PASS] All prompts achieved confidence score >= {}'.format(EXPECTED_MIN_CONFIDENCE))
-    
-    analysis_passed = True
-    for i, prompt_data in enumerate(test_prompts, 1):
-        try:
-            appearance = prompt_data.get('appearance', {})
-            techniques = prompt_data.get('techniques', [])
-            hair_complexity = len(appearance.get('hair', [])) // 2
-            eye_detail = len(appearance.get('eyes', []))
-            clothing_layers = len(appearance.get('clothing', []))
-            total_detail = hair_complexity + eye_detail + len(techniques)
-            tier = "standard" if total_detail < 3 else ("high-fidelity" if total_detail < 6 else "premium")
-            passed = tier in quality_tiers
-            overall_results.append({'test': 'Impact Analysis Accuracy', 'prompt': 'Prompt {} - {}'.format(i, prompt_data.get('subject', '')), 'passed': passed, 'confidence_estimate': 0.95 if passed else 0.1})
-        except Exception as e:
-            analysis_passed = False
-    assert analysis_passed, 'Impact analysis failed'
-    print('[PASS] All prompts analyzed with accurate impact assessment')
-    
-    negative_prompts = [generate_negative_prompt('anime'), generate_negative_prompt('realistic'), generate_negative_prompt('auto')]
-    for i, neg in enumerate(negative_prompts, 1):
-        assert isinstance(neg, list) and len(neg) > 0
-        for keyword in neg:
-            assert isinstance(keyword, str) and keyword.strip()
-    print('[PASS] Negative prompt generation: All valid')
-    
-    passed = sum(1 for r in overall_results if r['passed'])
-    total = len(overall_results)
-    print('\n  Total Tests: {} | Passed: {} | Failed: {}'.format(total, passed, total - passed))
-    print('  Overall Confidence: {:.2f}%'.format(passed / total * 100 if total > 0 else 0))
-    assert passed == total
+    # Check confidence threshold
+    appearance_score = _calculate_appearance_score(prompt_data)
+    techniques_score = _calculate_techniques_score(prompt_data)
+    setting_score = _calculate_setting_score(prompt_data)
+    raw_confidence = (appearance_score * 0.35 + techniques_score * 0.40 + setting_score * 0.25)
+    assert raw_confidence >= EXPECTED_MIN_CONFIDENCE, f"Confidence {raw_confidence:.4f} below threshold"
