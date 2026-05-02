@@ -1,31 +1,32 @@
-# TalkingArtProject — 面向AI智能体的结构化提示词工程框架
+# TalkingArtProject — AI Agent Prompt Engineering Framework
 
-> **重要说明**: 本项目专为**AI智能体服务**（OpenClaw、Hermes等）设计，提供模块化、可组合的提示词工程解决方案。不生产也不依赖任何AI绘画视频类视觉内容生成提示词。
+> **Important**: This project is designed for **AI agent services** (OpenClaw, Hermes, etc.) and provides modular, composable prompt engineering solutions. It does NOT produce or rely on any visual/video content generation prompts.
 
-## 🎯 项目定位
+## 🎯 Project Positioning
 
-这是一个为高级AI智能体构建的提示词工程框架，核心能力包括:
+This is a prompt engineering framework built for advanced AI agents with core capabilities:
 
-- **结构化提示词设计**: 基于清晰schema的系统化提示词组织
-- **角色原型定义**: 可复用的智能体行为与交互模式
-- **场景构图编排**: 多轮对话的上下文流转与控制
-- **风格时代适配**: 跨时代的表达范式迁移
+- **Structured Prompt Design**: Systematic prompt organization based on clear schemas
+- **Character Archetype Definition**: Reusable agent behavior and interaction patterns
+- **Scene Composition Orchestration**: Multi-turn dialogue context flow control
+- **Style Era Adaptation**: Cross-era expression paradigm migration
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 prompts/
 ├── character/
-│   └── archetypes/          # 角色原型提示词库（智能体人格定义）
+│   └── archetypes/          # Character archetype prompts (agent persona definitions)
 ├── scene/
-│   └── composition/         # 场景编排提示词（对话流转控制）
+│   └── [composition/]       # Scene composition prompts (dialogue flow control)
 ├── style/
-│   └── eras/                # 风格时代适配提示词（表达范式迁移）
-experiments/                 # 实验记录与迭代日志
-examples/                    # 使用案例与测试脚本
+│   ├── eras/               # Style era adaptation prompts (expression paradigm migration)
+│   └── lighting/           # Lighting effect prompts (visual-text mapping)
+experiments/                 # Experiment logs and iteration records
+examples/                    # Usage cases and test scripts
 ```
 
-## 🔧 Schema 版本控制
+## 🔧 Schema Version Control
 
 ```yaml
 schema_version: v1.0
@@ -33,14 +34,15 @@ author: LJLinCun
 project_name: TalkingArtProject
 framework_type: AI-Agent-Prompt-Engineering
 last_updated: 2024
-description: | 面向AI智能体的结构化提示词工程框架，提供模块化、可组合的
-              提示词设计能力。专为高级AI系统（OpenClaw、Hermes等）的
-              复杂交互场景而构建。
+description: | Structured prompt engineering framework for AI agents, providing 
+              modular and composable prompt design capabilities. Built for 
+              complex interaction scenarios in advanced AI systems (OpenClaw,
+              Hermes, etc.).
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 初始化项目
+### 1. Initialize the Project
 
 ```bash
 git clone https://github.com/LJLinCun/TalkingArtProject.git
@@ -48,39 +50,39 @@ cd TalkingArtProject
 git pull origin main
 ```
 
-### 2. 配置身份（首次使用）
+### 2. Configure Identity (First Time)
 
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your-email@example.com"
 ```
 
-### 3. Token 认证推送
+### 3. Token Authentication for Push
 
 ```bash
-# 方法1：使用 gh CLI（推荐）
+# Method 1: Use gh CLI (recommended)
 gh auth setup-git
 
-# 方法2：手动配置 git credential helper
+# Method 2: Configure git credential helper manually
 git config --global credential.helper store
 ```
 
-## 📝 核心能力说明
+## 📝 Core Capabilities
 
-### 角色原型（Character Archetypes）
-为AI智能体定义人格特征、行为模式与交互边界，实现高度一致的对话体验。
+### Character Archetypes
+Define personality traits, behavioral patterns, and interaction boundaries for AI agents, enabling highly consistent conversational experiences.
 
-### 场景构图（Scene Composition）
-设计多轮对话的上下文流转逻辑，确保复杂任务中的状态追踪与目标达成。
+### Scene Composition
+Design multi-turn dialogue context flow logic to ensure state tracking and goal achievement in complex tasks.
 
-### 风格时代适配（Style Eras）
-迁移不同历史时期的表达范式，使智能体能够跨越时空语境进行自然交互。
+### Style Era Adaptation
+Migrate expression paradigms across different historical periods, allowing agents to interact naturally across temporal and contextual contexts.
 
-## 🔐 安全与隐私
+## 🔐 Security & Privacy
 
-- 本项目不包含任何视觉内容生成能力
-- 所有提示词模块均为纯文本设计，无图像/视频依赖
-- 符合AI智能体系统的纯对话型交互需求
+- This project contains NO visual content generation capabilities
+- All prompt modules are purely text-based with zero image/video dependencies  
+- Designed for pure conversational interaction in AI agent systems
 
 ## 📄 License
 
