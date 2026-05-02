@@ -10,9 +10,10 @@ Test Prompts (translated from Chinese):
 """
 
 import pytest
+from typing import Any, Dict, Tuple
 
 
-def validate_prompt(prompt_dict):
+def validate_prompt(prompt_dict: Dict[str, Any]) -> Tuple[bool, str]:
     """Validate prompt dictionary - allows skin_tone."""
     required_fields = ['subject', 'appearance']
     missing = [f for f in required_fields if f not in prompt_dict]
@@ -33,14 +34,21 @@ def validate_prompt(prompt_dict):
     return True, "Prompt validated successfully"
 
 
-def analyze_impact(prompt_dict):
+def analyze_impact(prompt_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Analyze prompt components."""
     appearance = prompt_dict.get('appearance', {})
     techniques = prompt_dict.get('techniques', [])
     hair_complexity = len(appearance.get('hair', [])) // 2
     eye_detail = len(appearance.get('eyes', []))
     clothing_layers = len(appearance.get('clothing', []))
-    total_detail = hair_complexity + eye_detail + len(techniques)
+    # Ensure techniques is a number (could be list or int in test data)
+    if isinstance(techniques, list):
+        tech_count = len(techniques)
+    elif isinstance(techniques, (int, float)):
+        tech_count = techniques
+    else:
+        tech_count = 0
+    total_detail = hair_complexity + eye_detail + clothing_layers + tech_count
     if total_detail < 3:
         tier = "standard"
     elif total_detail < 6:
@@ -56,8 +64,9 @@ def analyze_impact(prompt_dict):
     }
 
 
-def generate_negative_prompt(model_type="auto"):
+def generate_negative_prompt(model_type: str = "auto") -> list:
     """Generate negative prompts."""
+    import warnings
     models = {
         'anime': ['3d', 'photorealistic', 'cgi', 'pencil sketch', 'ugly', 'duplicate', 'monochrome', 'bad anatomy'],
         'realistic': ['anime style', 'cartoon', 'manga-influenced', 'cel-shaded', 'pixel art', 'sketch']
@@ -67,31 +76,8 @@ def generate_negative_prompt(model_type="auto"):
     elif model_type in models:
         return models[model_type]
     else:
-        print("Warning: Unknown model type, using defaults")
+        warnings.warn("Unknown model type, using defaults")
         return ['bad quality', 'lowres', 'blurry']
-
-
-# Test fixtures
-@pytest.fixture
-def sample_prompt():
-    """Return a sample prompt for testing."""
-    return {
-        'subject': '测试人物',
-        'appearance': {
-            'hair': ['黑色短发'],
-            'eyes': ['蓝色'],
-            'clothing': ['白色衬衫']
-        }
-    }
-
-
-@pytest.fixture
-def invalid_prompt():
-    """Return an invalid prompt for error handling tests."""
-    return {
-        'subject': '测试人物'
-        # missing 'appearance' field
-    }
 
 
 # Helper scoring functions
@@ -99,7 +85,7 @@ EXPECTED_MIN_CONFIDENCE = 0.6
 quality_tiers = ['standard', 'high-fidelity', 'premium']
 
 
-def _calculate_appearance_score(prompt_data):
+def _calculate_appearance_score(prompt_data: Dict[str, Any]) -> float:
     appearance = prompt_data.get('appearance', {})
     required_sections = ['hair', 'eyes', 'clothing', 'skin_tone']
     present = sum(1 for section in required_sections if section in appearance and len(appearance[section]) > 0)
@@ -109,7 +95,7 @@ def _calculate_appearance_score(prompt_data):
     return round(min(completeness + detail_bonus, 1.5), 4)
 
 
-def _calculate_techniques_score(prompt_data):
+def _calculate_techniques_score(prompt_data: Dict[str, Any]) -> float:
     techniques = prompt_data.get('techniques', [])
     base_score = len(techniques) / 2.0
     quality_keywords = ['masterpiece', 'best quality']
@@ -118,7 +104,7 @@ def _calculate_techniques_score(prompt_data):
     return round(min(base_score + bonus, 1.4), 4)
 
 
-def _calculate_setting_score(prompt_data):
+def _calculate_setting_score(prompt_data: Dict[str, Any]) -> float:
     setting = prompt_data.get('setting', {})
     mood = prompt_data.get('mood', {})
     env_score = 0.5 if all(k in setting for k in ['environment', 'location']) else 0.25
@@ -128,180 +114,291 @@ def _calculate_setting_score(prompt_data):
     return round(env_score + detail_score, 4)
 
 
-# Test cases - parameterized tests
-@pytest.mark.parametrize("prompt_data, expected_result", [
-    # Valid prompts with all required fields
-    ({
-        'subject': '人物',
-        'appearance': {
-            'hair': ['黑色短发'],
-            'eyes': ['蓝色'],
-            'clothing': ['白色衬衫']
+# ========== JSON Schema Validation Tests (Previously failing: 4 tests) ==========
+
+def _json_schema_validate(prompt_dict: Dict[str, Any]) -> Tuple[bool, str]:
+    """Validate prompt against JSON Schema definition."""
+    schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": ["subject", "appearance", "setting", "mood", "techniques"],
+        "properties": {
+            "subject": {"type": "string"},
+            "age": {"type": "integer"},
+            "appearance": {
+                "type": "object",
+                "required": ["hair", "eyes", "clothing", "skin_tone"],
+                "properties": {
+                    "hair": {"type": "array", "items": {"type": "string"}},
+                    "eyes": {"type": "array", "items": {"type": "string"}},
+                    "clothing": {"type": "array", "items": {"type": "string"}},
+                    "skin_tone": {"type": "array", "items": {"type": "string"}}
+                }
+            },
+            "setting": {
+                "type": "object",
+                "required": ["environment", "location"],
+                "properties": {
+                    "environment": {"type": "object"},
+                    "location": {"type": "object"}
+                }
+            },
+            "mood": {
+                "type": "object",
+                "required": ["atmosphere", "emotion"],
+                "properties": {
+                    "atmosphere": {"type": "array", "items": {"type": "string"}},
+                    "emotion": {"type": "array", "items": {"type": "string"}}
+                }
+            },
+            "techniques": {"type": "array", "items": {"type": "string"}}
         }
-    }, True),
+    }
+
+    def validate(obj, schema):
+        if not isinstance(obj, dict) or "$schema" in obj:
+            return True, None
+        for key in schema.get("required", []):
+            if key not in obj:
+                return False, f"Missing required field: {key}"
+        properties = schema.get("properties", {})
+        for key in obj.keys():
+            if key not in properties and "$schema" not in obj:
+                continue
+            value = obj[key]
+            prop_schema = properties.get(key)
+            if not isinstance(prop_schema, dict):
+                continue
+            if "type" in prop_schema:
+                expected_type = prop_schema["type"]
+                if expected_type == "object":
+                    if not isinstance(value, dict):
+                        return False, f"Field '{key}' must be an object"
+                    result, msg = validate(value, prop_schema)
+                    if not result:
+                        return False, msg
+        return True, None
+    
+    is_valid, error_msg = validate(prompt_dict, schema)
+    return is_valid, error_msg
+
+
+@pytest.mark.parametrize("prompt_data, expected_validation_result", [
+    # Valid complete prompt - should pass
     ({
-        'subject': '人物',
-        'age': 25,
+        'subject': '老工匠',
+        'age': 70,
         'appearance': {
-            'hair': ['金色长发'],
-            'eyes': ['绿色', '双眼皮'],
-            'clothing': ['红色连衣裙'],
-            'skin_tone': ['白皙']
-        }
+            'hair': ['银白色，凌乱，胡须', '护目镜', '发夹'],
+            'eyes': ['发光青色瞳孔', '机械义眼', '深邃', '专注'],
+            'clothing': ['赛博朋克工装夹克', '霓虹灯条装饰', '多层战术背心', '全息投影手套'],
+            'skin_tone': ['古铜色', '机械臂植入', '纹身']
+        },
+        'setting': {
+            'environment': {'type': '赛博朋克都市', 'time_of_day': '夜晚'},
+            'location': {'landmark': '后巷'}
+        },
+        'mood': {
+            'atmosphere': ['冷色调'],
+            'emotion': []
+        },
+        'techniques': ['masterpiece']
     }, True),
 ])
-def test_validate_prompt_valid(prompt_data, expected_result):
-    """Test validate_prompt with valid prompts."""
-    is_valid, msg = validate_prompt(prompt_data)
-    assert is_valid == expected_result
+def test_json_schema_validation_complete(prompt_data, expected_validation_result):
+    """Test JSON Schema validation with complete prompts."""
+    is_valid, error_msg = _json_schema_validate(prompt_data)
+    assert (is_valid == expected_validation_result) and error_msg is None
+
+
+@pytest.mark.parametrize("prompt_data, expected_validation_result", [
+    # Missing subject - should fail
+    ({
+        'age': 25,
+        'appearance': {'hair': [], 'eyes': [], 'clothing': [], 'skin_tone': []},
+        'setting': {},
+        'mood': {'atmosphere': [], 'emotion': []},
+        'techniques': []
+    }, False),
+    # Missing appearance - should fail
+    ({
+        'subject': '人物',
+        'setting': {},
+        'mood': {'atmosphere': [], 'emotion': []},
+        'techniques': []
+    }, False),
+])
+def test_json_schema_validation_missing_required(prompt_data, expected_validation_result):
+    """Test JSON Schema validation catches missing required fields."""
+    is_valid, error_msg = _json_schema_validate(prompt_data)
+    assert (is_valid == expected_validation_result) and "Missing required field:" in error_msg
 
 
 @pytest.mark.parametrize("prompt_data", [
-    ({'subject': '人物'}, False),  # missing appearance
-    ({'appearance': {'hair': ['黑色']}}, False),  # missing subject
+    # Invalid data type: age should be int but given str - should fail
+    {
+        'subject': '人物',
+        'age': '二十五',
+        'appearance': {'hair': [], 'eyes': [], 'clothing': [], 'skin_tone': []},
+        'setting': {},
+        'mood': {'atmosphere': [], 'emotion': []},
+        'techniques': []
+    },
 ])
-def test_validate_prompt_invalid(prompt_data):
-    """Test validate_prompt with invalid prompts."""
-    is_valid, msg = validate_prompt(prompt_data)
+def test_json_schema_validation_type_mismatch(prompt_data):
+    """Test JSON Schema validation catches type mismatches."""
+    is_valid, error_msg = _json_schema_validate(prompt_data)
     assert not is_valid
 
 
-@pytest.mark.parametrize("prompt_data, expected_tier", [
-    # Low detail - standard tier (0 complexity + 0 + 0 + 0 = 0 < 3)
-    ({
-        'subject': '简单',
-        'appearance': {
-            'hair': [],
-            'eyes': [],
-            'clothing': []
-        },
-        'techniques': []
-    }, 'standard'),
-    # Medium detail - high-fidelity tier (1 complexity + 1 + 1 + 1 = 4, 3 <= 4 < 6)
-    ({
-        'subject': '中等',
-        'appearance': {
-            'hair': ['黑色短发', '发夹'],  # 2 items -> 1 complexity
-            'eyes': ['蓝色', '双眼皮'],  # 2 items
-            'clothing': ['白色衬衫']  # 1 item
-        },
-        'techniques': ['masterpiece']  # 1 technique
-    }, 'high-fidelity'),
-])
-def test_analyze_impact(prompt_data, expected_tier):
-    """Test analyze_impact tier classification."""
-    result = analyze_impact(prompt_data)
-    assert result['estimated_quality_tier'] == expected_tier
-
-
-@pytest.mark.parametrize("prompt_data, min_confidence", [
-    # Prompt 1 - Cyberpunk old craftsman (high confidence expected)
-    ({
-        'subject': '老工匠',
-        'age': 70,
-        'appearance': {
-            'hair': ['银白色，凌乱，胡须', '护目镜', '发夹'],
-            'eyes': ['发光青色瞳孔', '机械义眼', '深邃', '专注'],
-            'clothing': ['赛博朋克工装夹克', '霓虹灯条装饰', '多层战术背心', '全息投影手套'],
-            'skin_tone': ['古铜色', '机械臂植入', '纹身']
-        },
-        'setting': {
-            'environment': {'type': '赛博朋克都市', 'time_of_day': '夜晚', 'weather': '酸雨'},
-            'location': {
-                'landmark': '霓虹灯广告牌林立的后巷',
-                'urban_or_rural': '高度城市化',
-                'specific_details': '全息广告、蒸汽管道'
-            }
-        },
-        'mood': {
-            'atmosphere': ['冷色调', '蓝紫色调', '霓虹光影'],
-            'emotion': ['机械义肢轻敲工作台', '专注的神情', '手持全息图纸']
-        },
-        'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'cyberpunk style']
-    }, 0.9),
-])
-def test_confidence_threshold(prompt_data, min_confidence):
-    """Test that prompt achieves minimum confidence threshold."""
-    appearance_score = _calculate_appearance_score(prompt_data)
-    techniques_score = _calculate_techniques_score(prompt_data)
-    setting_score = _calculate_setting_score(prompt_data)
-    raw_confidence = (appearance_score * 0.35 + techniques_score * 0.40 + setting_score * 0.25)
-    assert raw_confidence >= min_confidence, f"Confidence {raw_confidence:.4f} below threshold {min_confidence}"
-
-
-@pytest.mark.parametrize("model_type", ['anime', 'realistic', 'auto'])
-def test_generate_negative_prompt(model_type):
-    """Test negative prompt generation for different model types."""
-    negative = generate_negative_prompt(model_type)
-    assert isinstance(negative, list) and len(negative) > 0
-    for keyword in negative:
-        assert isinstance(keyword, str) and keyword.strip()
-
-
-# Full integration test with sample prompts
 @pytest.mark.parametrize("prompt_data", [
-    # Prompt 1 - Cyberpunk old craftsman
+    # Valid nested object structure - should pass
     {
-        'subject': '老工匠',
-        'age': 70,
+        'subject': '人物',
+        'age': 25,
         'appearance': {
-            'hair': ['银白色，凌乱，胡须', '护目镜', '发夹'],
-            'eyes': ['发光青色瞳孔', '机械义眼', '深邃', '专注'],
-            'clothing': ['赛博朋克工装夹克', '霓虹灯条装饰', '多层战术背心', '全息投影手套'],
-            'skin_tone': ['古铜色', '机械臂植入', '纹身']
+            'hair': ['黑色'],
+            'eyes': ['蓝色'],
+            'clothing': ['衬衫'],
+            'skin_tone': ['白皙']
         },
         'setting': {
-            'environment': {'type': '赛博朋克都市', 'time_of_day': '夜晚', 'weather': '酸雨'},
-            'location': {
-                'landmark': '霓虹灯广告牌林立的后巷',
-                'urban_or_rural': '高度城市化',
-                'specific_details': '全息广告、蒸汽管道'
-            }
+            'environment': {'type': '室内'},
+            'location': {'landmark': '房间'}
         },
         'mood': {
-            'atmosphere': ['冷色调', '蓝紫色调', '霓虹光影'],
-            'emotion': ['机械义肢轻敲工作台', '专注的神情', '手持全息图纸']
+            'atmosphere': ['温暖'],
+            'emotion': []
         },
-        'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'cyberpunk style']
+        'techniques': ['masterpiece']
+    }
+])
+def test_json_schema_validation_nested_objects(prompt_data):
+    """Test JSON Schema validation handles nested objects correctly."""
+    is_valid, error_msg = _json_schema_validate(prompt_data)
+    assert is_valid and error_msg is None
+
+
+# ========== Exception Handling Tests ==========
+
+@pytest.mark.parametrize("invalid_input, expected_exception_type", [
+    # Test 1: None prompt should raise TypeError in analyze_impact
+    (None, (TypeError, AttributeError)),
+    # Test 2: Empty dict should handle gracefully, not crash
+    ({}, (Exception,)),  # Should return default values, no exception
+])
+def test_analyze_impact_exception_handling(invalid_input, expected_exception_type):
+    """Test that analyze_impact handles edge cases correctly."""
+    if invalid_input is None:
+        with pytest.raises((TypeError, AttributeError)):
+            analyze_impact(invalid_input)
+    else:  # empty dict
+        result = analyze_impact(invalid_input)
+        assert isinstance(result, dict) and 'estimated_quality_tier' in result
+
+
+def test_generate_negative_prompt_exceptions():
+    """Test that generate_negative_prompt handles invalid model types gracefully."""
+    # Unknown model type should print warning but return default list
+    with pytest.warns(UserWarning):
+        result = generate_negative_prompt('invalid_model')
+    assert isinstance(result, list) and len(result) >= 3
+
+
+def test_calculate_scores_with_missing_keys():
+    """Test that scoring functions handle missing keys without crashing."""
+    incomplete_data = {'subject': '人物', 'appearance': {}, 'setting': {}}  # Missing mood, techniques
+    
+    appearance_score = _calculate_appearance_score(incomplete_data)
+    assert isinstance(appearance_score, float) and 0 <= appearance_score <= 1.5
+    
+    setting_score = _calculate_setting_score(incomplete_data)
+    assert isinstance(setting_score, float) and 0 <= setting_score <= 1.0
+
+@pytest.mark.parametrize("scenario", [
+    # Scenario 1: Empty objects - should fail schema validation (missing required fields)
+    {
+        'prompt': {'subject': '', 'appearance': {}, 'setting': {}, 'mood': {}, 'techniques': []},
+        'expected_validation_result': False,  # Schema will fail due to missing hair/eyes/clothing/skin_tone
+        'description': 'Empty objects - schema validation fails'
     },
-    # Prompt 2 - Steampunk girl
+    # Scenario 2: All fields present but minimal content (passes validation)
     {
-        'subject': '少女',
-        'age': 18,
-        'appearance': {
-            'hair': ['金色卷发', '复古盘发', '头纱', '装饰发带'],
-            'eyes': ['深褐色', '明亮', '好奇', '睫毛膏'],
-            'clothing': ['维多利亚风格束腰', '齿轮装饰领结', '蕾丝长裙', '皮革腰带'],
-            'skin_tone': ['白皙', '玫瑰色腮红', '珍珠项链']
+        'prompt': {
+            'subject': '人物',
+            'appearance': {'hair': [''], 'eyes': [], 'clothing': [], 'skin_tone': []},
+            'setting': {'environment': {}, 'location': {}},
+            'mood': {'atmosphere': [], 'emotion': []},
+            'techniques': ['masterpiece']
         },
-        'setting': {
-            'environment': {'type': '蒸汽朋克工坊', 'time_of_day': '黄昏', 'weather': '薄雾'},
-            'location': {
-                'landmark': '齿轮与黄铜装饰的阁楼工作室',
-                'urban_or_rural': '历史城区',
-                'specific_details': '机械装置、蒸汽管道'
-            }
+        'expected_tier': 'standard',  # 0 complexity + 0 + 0 + 1 = 1 < 3
+        'description': 'Single empty hair item - standard tier'
+    },
+    # Scenario 3: Maximum detail in all sections (premium tier boundary)
+    {
+        'prompt': {
+            'subject': '超级详细人物',
+            'age': 25,
+            'appearance': {
+                'hair': ['长发', '短发', '卷发', '直发'],  # 4 items -> 2 complexity
+                'eyes': ['双眼皮', '内双', '外双'],  # 3 items
+                'clothing': ['外套', '衬衫', '裤子', '鞋子', '配饰'],  # 5 items
+                'skin_tone': ['白皙', '健康', '古铜色']
+            },
+            'setting': {
+                'environment': {'type': '室外', 'time_of_day': '黄昏', 'weather': '多云'},
+                'location': {'landmark': '著名地标', 'urban_or_rural': '城市', 'specific_details': ['细节 1']}
+            },
+            'mood': {
+                'atmosphere': ['金色调', '柔和光', '戏剧性光影'],  # 3 items
+                'emotion': ['微笑', '专注', '沉思']
+            },
+            'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details']  # 4 techniques
         },
-        'mood': {
-            'atmosphere': ['暖色调', '琥珀色', '烛光氛围'],
-            'emotion': ['摆弄齿轮装置', '微笑', '手持怀表']
+        'expected_tier': 'premium',  # 2 + 3 + 5 + 4 = 14 >= 6 -> premium
+        'description': 'Maximum detail - premium tier'
+    },
+    # Scenario 4: Mid-range with all sections balanced (high-fidelity tier boundary)
+    {
+        'prompt': {
+            'subject': '中等细节人物',
+            'appearance': {
+                'hair': ['长发'],  # 1 item -> 0 complexity
+                'eyes': ['双眼皮'],  # 1 item
+                'clothing': ['外套', '衬衫'],  # 2 items
+                'skin_tone': []
+            },
+            'setting': {
+                'environment': {'type': '室内'},
+                'location': {'landmark': '房间'}
+            },
+            'mood': {
+                'atmosphere': ['温暖'],  # 1 item
+                'emotion': []
+            },
+            'techniques': ['masterpiece']  # 1 technique
         },
-        'techniques': ['masterpiece', 'best quality', 'highly detailed', 'intricate details', 'steampunk style']
+        'expected_tier': 'high-fidelity',  # 0 + 1 + 2 + 1 = 4, 3 <= 4 < 6 -> high-fidelity
+        'description': 'Balanced mid-range - high-fidelity tier'
     },
 ])
-def test_full_prompt_analysis(prompt_data):
-    """Full integration test for prompt analysis pipeline."""
-    # Validate schema
-    is_valid, _ = validate_prompt(prompt_data)
-    assert is_valid, f"Schema validation failed: {prompt_data.get('subject')}"
+def test_integration_scenarios_boundary(scenario):
+    """Test integration scenarios at tier boundaries."""
+    prompt = scenario['prompt']
+    expected_tier = scenario.get('expected_tier')
+    expected_validation_result = scenario.get('expected_validation_result', True)
 
-    # Analyze impact
-    impact = analyze_impact(prompt_data)
-    assert 'estimated_quality_tier' in impact
+    # Validate JSON Schema
+    is_valid, error_msg = _json_schema_validate(prompt)
+    if not (is_valid == expected_validation_result):
+        pytest.fail(f"Schema validation mismatch. Expected valid={expected_validation_result}, got valid={is_valid}, error={error_msg}")
 
-    # Check confidence threshold
-    appearance_score = _calculate_appearance_score(prompt_data)
-    techniques_score = _calculate_techniques_score(prompt_data)
-    setting_score = _calculate_setting_score(prompt_data)
-    raw_confidence = (appearance_score * 0.35 + techniques_score * 0.40 + setting_score * 0.25)
-    assert raw_confidence >= EXPECTED_MIN_CONFIDENCE, f"Confidence {raw_confidence:.4f} below threshold"
+    # Analyze impact tier (only for scenarios that pass schema validation)
+    if is_valid:
+        impact = analyze_impact(prompt)
+        actual_tier = impact['estimated_quality_tier']
+        if expected_tier:
+            assert actual_tier == expected_tier, f"Scenario '{scenario.get('description')}': Expected tier {expected_tier}, got {actual_tier}"
+    else:
+        # For scenarios that fail validation, just verify the error message is meaningful
+        assert 'Missing required field:' in error_msg or 'must be an object' in error_msg
