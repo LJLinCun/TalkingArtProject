@@ -1,99 +1,79 @@
-# style/fusion-params.py
+# style/fusion-params.py — 智能体能力范式迁移引擎
 ---
-# Style Fusion Engine - Parameterized Style Mixing
+# Agent Capability Paradigm Shift Engine - Cross-Domain Expression Framework
 schema_version: "1.0"
 author: TalkingArtProject
+framework_type: AI-Agent-Prompt-Engineering
 
 # Algorithm Definitions (Python functions)
-def create_fusion(base_style: str, accent_style: str = None) -> dict:
+def create_capability_shift(base_domain: str, target_domain: str = None) -> dict:
     """
-    Create a style fusion prompt with parameters.
+    创建跨领域能力迁移提示词。
     
     Args:
-        base_style: Primary style (e.g., 'anime', 'watercolor')
-        accent_style: Secondary style to blend in
+        base_domain: 原始智能体能力域（如 '数据分析', '代码生成', '任务规划'）
+        target_domain: 目标能力域（用于跨范式适配与表达框架转换）
     
     Returns:
         Dictionary containing:
-            - fusion_name: Combined style name
-            - techniques: List of technical descriptors
-            - color_palette: Suggested colors
-            - example_prompt: Generated prompt string
+            - shift_name: 迁移后的能力名称
+            - adaptation_techniques: 适配方法列表
+            - expression_framework: 表达框架建议
+            - example_prompt: 生成的提示词模板
     """
     
-    # Style token database (expand as needed)
-    style_tokens = {
-        'anime': {
-            'features': ['manga-influenced', 'cel-shaded', 'character-focused'],
-            'colors': ['#FF6B9D', '#4A5F7C', '#FFE5D9'],
-            'negative': ['3d', 'photorealistic', 'cgi']
+    # 智能体能力领域数据库（按范式分类）
+    domain_paradigms = {
+        '数据分析': {
+            'methods': ['统计推断', '模式识别', '异常检测'],
+            'frameworks': ['量化分析', '概率建模']
         },
-        'watercolor': {
-            'features': ['wet-on-wet', 'transparent layers', 'soft edges'],
-            'colors': ['#E8F4F8', '#FFD1DC', '#6B90A6'],
-            'negative': ['digital art', 'vector graphics']
+        '代码生成': {
+            'methods': ['语法归纳', '重构推理', '类型推断'],
+            'frameworks': ['形式化验证', '抽象解释']
         },
-        'oil_paint': {
-            'features': ['impasto texture', 'visible brush strokes', 'thick paint application'],
-            'colors': ['#5C4033', '#8B7355', '#D2691E'],
-            'negative': ['smooth gradients']
+        '任务规划': {
+            'methods': ['子任务分解', '约束调度', '资源分配'],
+            'frameworks': ['时序逻辑', '优化理论']
         },
-        'pixel_art': {
-            'features': ['retro 8-bit', 'dithering', 'limited palette'],
-            'colors': ['#00FF7F', '#FF6347', '#9370DB'],
-            'negative': ['high resolution', 'smooth']
-        },
-        'ink_sketch': {
-            'features': ['cross-hatching', 'charcoal shading', 'line weight variation'],
-            'colors': ['#1C1C1C', '#808080', '#FFFFFF'],
-            'negative': ['color']
+        '对话理解': {
+            'methods': ['意图识别', '槽位填充', '多轮上下文追踪'],
+            'frameworks': ['语义解析', '指代消解']
         }
     }
     
-    base = style_tokens.get(base_style.lower()) or {'features': [base_style]}
-    accent = style_tokens.get(accent_style) if accent_style else {}
+    base = domain_paradigms.get(base_domain.lower()) or {'methods': [base_domain], 'frameworks': []}
+    target = domain_paradigms.get(target_domain) if target_domain else {}
     
-    # Generate fusion techniques
-    primary_techniques = base['features']
-    secondary_techniques = accent['features'] if accent else []
-    combined_techniques = primary_techniques + secondary_techniques[:2]  # Mix 2 from each
+    # 生成迁移适配方法
+    primary_methods = base['methods']
+    secondary_methods = target['methods'][:2] if target else []
+    combined_methods = list(set(primary_methods + secondary_methods))
     
     return {
-        'fusion_name': f"{base_style.capitalize()} Fusion",
-        'techniques': combined_techniques,
-        'color_palette': base['colors'] if accent else [base['colors'][0], '#FFFFFF', '#000000'],
-        'example_prompt': create_example_prompt(base_style, accent_style)
+        'shift_name': f"{base_domain.capitalize()} → {target_domain or '跨范式'}迁移",
+        'adaptation_techniques': combined_methods,
+        'expression_frameworks': base['frameworks'] if target else [f"基于{base_domain}的框架适配"]
     }
 
-# Example prompt generator (simplified version of full implementation)
-def create_example_prompt(base: str, accent: str = None) -> str:
-    """Generate an example prompt for the fusion style."""
-    base_keywords = {
-        'anime': ['manga-influenced', 'cel-shaded'],
-        'watercolor': ['wet-on-wet', 'transparent layers'],
-        'oil_paint': ['impasto texture', 'visible brush strokes'],
-        'pixel_art': ['retro 8-bit', 'dithering']
+# 能力表达框架生成器（简化版本）
+def create_expression_template(base: str, target: str = None) -> str:
+    """生成跨领域能力表达的提示词模板。"""
+    base_templates = {
+        '数据分析': ['统计推断', '模式识别'],
+        '代码生成': ['语法归纳', '重构推理'],
+        '任务规划': ['子任务分解', '约束调度']
     }
     
-    primary = base_keywords.get(base.lower(), [base])
-    secondary = accent_keywords[accent.lower()] if accent else []
+    primary = base_templates.get(base.lower(), [base])
+    secondary = target_templates[target.lower()] if target else []
     
-    return f"masterpiece, best quality, {primary[0]}, {secondary[0] if secondary else 'highly detailed'}"
+    return f"智能体能力迁移：{primary[0]} → {secondary[0] if secondary else '跨范式适配'}"
 
-# Color palette utilities (can be expanded with hex-to-rgb conversions)
-def get_palette(base_style: str) -> list:
-    """Return color palette for a given style."""
-    return {
-        'anime': ['#FF6B9D', '#4A5F7C', '#FFE5D9'],  # Hot pink, steel blue, peach
-        'watercolor': ['#E8F4F8', '#FFD1DC', '#6B90A6'],
-        'oil_paint': ['#5C4033', '#8B7355', '#D2691E'],
-        'pixel_art': ['#00FF7F', '#FF6347', '#9370DB']
-    }.get(base_style.lower(), ['#000000', '#FFFFFF', '#808080'])
-
-# Usage examples:
+# 使用示例:
 if __name__ == "__main__":
-    # Create anime + watercolor fusion
-    result = create_fusion('anime', 'watercolor')
-    print(f"Style: {result['fusion_name']}")
-    print(f"Techniques: {result['techniques']}")
-    print(f"Palette: {result['color_palette']}")
+    # 数据分析 → 代码生成 范式迁移
+    result = create_capability_shift('数据分析', '代码生成')
+    print(f"能力迁移：{result['shift_name']}")
+    print(f"适配方法：{result['adaptation_techniques']}")
+    print(f"表达框架：{result['expression_frameworks']}")
