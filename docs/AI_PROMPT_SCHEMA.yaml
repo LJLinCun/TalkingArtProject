@@ -1,0 +1,230 @@
+# AI Agent Prompt Validation Schema
+# AI 智能体提示词验证模式 - TalkingArtProject v2.0
+
+---
+
+## 📋 Overview (概述)
+
+This YAML schema validates prompt definitions in the TalkingArtProject ecosystem, ensuring consistency across character archetypes, task orchestrations, and style transfers.
+
+此 YAML 模式验证 TalkingArtProject 生态系统中的提示词定义，确保角色原型、任务编排和风格迁移的一致性。
+
+---
+
+## 🎯 Schema Components (模式组件)
+
+### Component 1: Character Archetype (角色原型)
+
+```yaml
+type: archetype_library
+schema_version: "2.0"
+description: "Character archetype definition with personality and props"
+
+archetype:
+  name: string                     # Required - Unique identifier
+  base_prompt: str                 # Required - Core prompt template
+  
+  hair_options: list[string]       # Optional - Visual variations
+  eye_options: list[string|list]   # Optional - Eye descriptions
+  clothing_layers: list[string]    # Optional - Layered attire
+  props: list[string]              # Optional - Character accessories
+  personality_traits: list[string] # Required - Behavioral patterns
+```
+
+**Validation Rules:**
+- `name` must be unique across the library
+- `base_prompt` cannot exceed 500 characters
+- At least one of `hair_options`, `eye_options`, or `clothing_layers` is required
+- All strings in `personality_traits` should be ≤ 80 chars
+
+### Component 2: Task Orchestration (任务编排)
+
+```yaml
+type: task_orchestrator
+schema_version: "1.0"
+description: "Multi-step task definition with workflow management"
+
+task:
+  name: string                     # Required - Task identifier
+  summary: string                  # Optional - One-line description
+  goal: string                     # Required - Ultimate objective
+  
+  steps:
+    type: array                    # Required, min: 3, max: 12
+    items:
+      step_number: integer         # Required, 1-indexed
+      action: string               # Required - Primary action
+      decision_points: list        # Optional - Branching logic
+      validation_criteria: list[string]   # Optional - Success checks
+      
+  output_format:
+    type: array                    # Required
+    items:
+      format_type: enum            # {markdown, json, csv, code}
+      schema_def: object           # Optional - JSON Schema if applicable
+```
+
+**Validation Rules:**
+- `steps` must have at least 3 and maximum 12 elements
+- Each step's `step_number` must be sequential from 1 to N
+- At least one `validation_criteria` per step (recommended)
+- If `output_format.type` is `json`, `schema_def` is required
+
+### Component 3: Style Transfer Definition (风格迁移定义)
+
+```yaml
+type: style_definition
+schema_version: "1.0"
+description: "Era/lighting/style parameter mappings for transfer"
+
+style:
+  name: string                     # Required - Unique style ID
+  eras: list[string]               # Optional - Associated historical periods
+  lighting_mood: enum              # Required - {ambient, dramatic, cinematic, natural}
+  color_palette: object            # Optional - Dominant colors
+  
+  parameter_mappings:
+    type: array                    # Required
+    items:
+      input_domain: string         # e.g., "text_prompt", "image_description"
+      output_parameters: list[string]   # Specific generation params
+```
+
+**Validation Rules:**
+- `lighting_mood` must be exactly one of the enum values
+- `parameter_mappings.input_domain` should align with project domains
+- Max 5 `eras` per style definition
+
+---
+
+## 🧪 Validation Script (验证脚本)
+
+```python
+# validate_prompts.py - Run this to check all prompts against schema
+from pathlib import Path
+import yaml
+import json
+from typing import Any, Dict, List
+
+def load_schema(schema_path: str) -> dict:
+    """Load YAML schema definition."""
+    with open(schema_path) as f:
+        return yaml.safe_load(f)
+
+def validate_archetype(data: dict, path: str = "") -> list:
+    """Validate archetype_library data against rules."""
+    errors = []
+    
+    if not isinstance(data.get("archetype", {}).get("personality_traits", []), list):
+        errors.append(f"{path}: personality_traits must be a list")
+    elif len(data["archetype"]["personality_traits"]) > 10:
+        errors.append(f"{path}: Maximum 10 personality traits recommended")
+    
+    base_prompt = data.get("archetype", {}).get("base_prompt", "")
+    if len(base_prompt) > 500:
+        errors.append(f"{path}: base_prompt exceeds 500 characters (length={len(base_prompt)})")
+    
+    return errors
+
+def validate_task(data: dict, path: str = "") -> list:
+    """Validate task_orchestrator data against rules."""
+    errors = []
+    steps = data.get("task", {}).get("steps", [])
+    
+    if not isinstance(steps, list) or len(steps) < 3:
+        errors.append(f"{path}: Steps must have at least 3 elements")
+    elif len(steps) > 12:
+        errors.append(f"{path}: Maximum 12 steps recommended for maintainability")
+    
+    # Check sequential numbering
+    seen = set()
+    for i, step in enumerate(steps):
+        step_num = step.get("step_number", i + 1)
+        if step_num not in seen:
+            seen.add(step_num)
+        else:
+            errors.append(f"{path}[{i}]: Duplicate or non-sequential step_number={step_num}")
+    
+    return errors
+
+def validate_all_prompts(root_dir: str = "prompts") -> Dict[str, list]:
+    """Validate all prompt files in the given directory."""
+    results = {}
+    for file_path in Path(root_dir).rglob("*.yaml"): 
+        try:
+            with open(file_path) as f:
+                data = yaml.safe_load(f)
+            errors = validate_archetype(data, str(file_path)) or \
+                     validate_task(data, str(file_path))  # Try both validators
+            results[str(file_path)] = errors if errors else ["✓ Valid"]
+        except Exception as e:
+            results[str(file_path)] = [f"✗ Error: {e}"]
+    return results
+
+if __name__ == "__main__":
+    print("=== TalkingArtProject Prompt Validation ===")
+    report = validate_all_prompts()
+    
+    for file, issues in report.items():
+        status = "✅ PASS" if "PASS" in str(issues) else f"❌ FAIL: {len([i for i in issues if 'FAIL' in str(i)])} errors"
+        print(f"  {file.split('/')[-1]}: {status}")
+```
+
+---
+
+## 📊 Validation Results Template (验证结果模板)
+
+```json
+{
+  "timestamp": "2025-05-02T14:30:00Z",
+  "version": "v2.0",
+  "summary": {
+    "total_files": 15,
+    "passed": 12,
+    "failed": 3
+  },
+  "detailed_results": [
+    {
+      "file": "prompts/character/archetypes/engineer.yaml",
+      "status": "PASS",
+      "checks_applied": ["archetype_schema", "personality_traits_max_10"]
+    }
+  ]
+}
+```
+
+---
+
+## 🔄 Continuous Integration (持续集成)
+
+Add to `.github/workflows/validate-prompts.yml`:
+
+```yaml
+name: Validate Prompts
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+          
+      - name: Run prompt validation
+        run: |
+          python validate_prompts.py
+          
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: prompts/validation_report.json
+```
+
+---
+
+**Schema Owner:** Lin Cun (希悦)  
+**Last Updated:** 2025-May-02
