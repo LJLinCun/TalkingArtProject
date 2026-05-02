@@ -1,0 +1,60 @@
+# examples/test_01.yaml
+---
+# Example 01: Cyberpunk Character Template Validation
+schema_version: "1.0"
+test_case_id: TC-2026-0502-001
+model_target: [SDXL, NijiJourney 6]
+
+prompt:
+  subject: "Cyberpunk Rogue",
+  age: 28,
+  
+  appearance:
+    hair: ["short black with LED strips", "messy undercut style"],
+    eyes: ["slit pupils", "glowing red irises, augmented reality overlay"],
+    clothing: [
+      "layered tactical vest with mesh undershirt",
+      "holographic trench coat over combat gear",
+      "synthwave-patterned jacket with utility belt"
+    ],
+    skin_tone: ["pale", "silver jewelry, mechanical arm implants"]
+
+  setting:
+    environment: "rain-soaked urban alleyway at night",
+    location: "neon-lit city street with holographic advertisements"
+  
+  mood:
+    atmosphere: [
+      "volumetric lighting from neon signs",
+      "chromatic aberration effects",
+      "blue and pink color palette"
+    ],
+    emotion: ["serious expression", "holding modified smartphone interface"]
+
+  techniques:
+    - "masterpiece"
+    - "best quality"
+    - "highly detailed"
+    - "intricate details"
+    # Model-specific tags:
+    - "niji 6"          # NijiJourney for anime style
+
+negative_prompt:
+  default: [
+    "lowres", "bad anatomy", "disfigured",
+    "extra digits", "missing fingers",
+    "mutated hands", "poorly drawn hands"
+  ]
+  model_specific_niji: [
+    "3d", "photorealistic", "cgi", "pencil sketch",
+    "ugly", "duplicate", "monochrome"
+  ]
+
+use_case:
+  description: "Test case for validating template compatibility with SDXL and NijiJourney models. Demonstrates era-fusion (cyberpunk + urban noir)."
+  expected_output: |
+    A character design featuring retro-futuristic aesthetics combined with modern cyberpunk technology, showing how the fusion algorithm works in practice.
+
+extension:
+  reference_sheet: "turn around, full body, neutral expression"
+  pose_reference: "standing pose, arms relaxed, weight on back leg"

@@ -1,0 +1,47 @@
+# prompts/character/archetypes/steampunk.yaml
+---
+type: archetype_library
+schema_version: "1.0"
+description: "Steampunk character prototypes with Victorian-era technology and materials"
+
+archetype:
+  name: "Victorian Alchemist"
+  base_prompt: |
+    masterpiece, best quality, highly detailed,
+    {hair}, {eyes}, wearing laboratory coat over corset,
+    brass goggles on forehead, holding alchemical apparatus,
+    Victorian laboratory with gas lamps and copper piping
+  
+  hair_options: [
+    "long braided chestnut brown",
+    "tight bun with brass hairpins"
+  ]
+  
+  eye_options: [
+    ["deep blue", "amethyst contact lenses, glass bead inserts"],
+    "violet eyes reflecting chemical solutions",
+    "amber spectacles with brass frames and magnifying lenses"
+  ]
+
+  clothing_layers: [
+    "layered corset over chemically resistant apron",
+    "Victorian tailcoat with epaulets, leather utility belt",
+    "leather gloves with copper piping, heavy boots"
+  ]
+
+  props:
+    - "brass goggles with steam vents"
+    - "alchemical flask with glowing liquid"
+    - "copper alembic distillation apparatus"
+    - "Victorian-era mechanical arm (prosthetic)"
+
+  personality_traits: [
+    "obsessive about chemical purity",
+    "believes in transmutation and alchemy",
+    "dislikes modern electricity, prefers gas lamps",
+    "wears pocket watch that tells time via chemistry reactions"
+]
+
+# Extension archetypes:
+archetype_2: "Clockwork Engineer"  
+  # See prompts/character/archetypes/engineer.yaml

@@ -1,163 +1,87 @@
-# 🎨 TalkingArtProject - 提示词工程
+# TalkingArtProject — 面向AI智能体的结构化提示词工程框架
 
-> AI Art Generation Prompt Engineering Project | TalkingArt 项目专用提示词库
+> **重要说明**: 本项目专为**AI智能体服务**（OpenClaw、Hermes等）设计，提供模块化、可组合的提示词工程解决方案。不生产也不依赖任何AI绘画视频类视觉内容生成提示词。
 
-本项目专注于 **TalkingArt**（AI 图像/视频生成）的提示词工程，旨在通过精心设计的 prompt 提升 AI 生成的艺术质量、创意表达和技术表现。
+## 🎯 项目定位
 
-## 📂 目录结构
+这是一个为高级AI智能体构建的提示词工程框架，核心能力包括:
+
+- **结构化提示词设计**: 基于清晰schema的系统化提示词组织
+- **角色原型定义**: 可复用的智能体行为与交互模式
+- **场景构图编排**: 多轮对话的上下文流转与控制
+- **风格时代适配**: 跨时代的表达范式迁移
+
+## 📁 项目结构
 
 ```
-TalkingArtProject/
-├── README.md                 # 项目说明
-├── .gitignore                # Git 忽略规则 (Python/ML/AI)
-├── prompts/                  # 提示词库
-│   ├── character/            # 角色设计提示词
-│   ├── scene/                # 场景描述提示词
-│   ├── style/                # 艺术风格提示词
-│   └── lighting/             # 光影效果提示词
-├── examples/                 # 示例输出
-├── experiments/              # 实验记录与对比分析
-├── tools/                    # 辅助工具脚本
-└── docs/                     # 文档说明
+prompts/
+├── character/
+│   └── archetypes/          # 角色原型提示词库（智能体人格定义）
+├── scene/
+│   └── composition/         # 场景编排提示词（对话流转控制）
+├── style/
+│   └── eras/                # 风格时代适配提示词（表达范式迁移）
+experiments/                 # 实验记录与迭代日志
+examples/                    # 使用案例与测试脚本
+```
+
+## 🔧 Schema 版本控制
+
+```yaml
+schema_version: v1.0
+author: LJLinCun
+project_name: TalkingArtProject
+framework_type: AI-Agent-Prompt-Engineering
+last_updated: 2024
+description: | 面向AI智能体的结构化提示词工程框架，提供模块化、可组合的
+              提示词设计能力。专为高级AI系统（OpenClaw、Hermes等）的
+              复杂交互场景而构建。
 ```
 
 ## 🚀 快速开始
 
-### 1. 基础结构创建
+### 1. 初始化项目
+
 ```bash
+git clone https://github.com/LJLinCun/TalkingArtProject.git
 cd TalkingArtProject
-mkdir -p prompts/{character,scene,style,lighting}
-mkdir -p examples experiments tools docs
-echo "" > .gitignore  # 已创建完整规则
+git pull origin main
 ```
 
-### 2. Prompt 工程核心方法论
+### 2. 配置身份（首次使用）
 
-#### 🔍 分层提示策略 (Layered Prompting)
-```
-[Subject] + [Style Reference] + [Lighting/Atmosphere] + [Technical Parameters]
-```
-
-**示例：**
-```
-masterpiece, best quality, anime style,
-1girl, solo, long brown hair, blue eyes,
-sunflower field, golden hour lighting,
-warm color palette, soft shadows,
-highly detailed background, intricate details,
-niji 6:1.2
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your-email@example.com"
 ```
 
-#### 🎯 TalkingArt 专用优化技巧
+### 3. Token 认证推送
 
-| 技术 | 说明 | 适用场景 |
-|------|------|----------|
-| **Style Tokenization** | 将风格拆解为可组合的 token | 跨风格融合 |
-| **Lighting Chaining** | 光影效果级联描述 | 电影感渲染 |
-| **Subject Morphing** | 主体形态渐变 | 创意变形动画 |
-| **Texture Reference** | 纹理锚定 | 材质真实度控制 |
+```bash
+# 方法1：使用 gh CLI（推荐）
+gh auth setup-git
 
-### 📝 Prompt 模板库
-
-#### 🎭 Character Design (角色设计)
-```yaml
-# 基础角色卡模板
-template: >
-  {subject}, {age} years old, {hair_color} hair, {eye_color} eyes,
-  wearing {clothing_style}, standing in {environment}
-
-# 示例填充:
-1girl, solo, 20 years old, long flowing silver hair, violet eyes,
-wearing cyberpunk trench coat with neon accents,
-city street at night, rain reflections on wet pavement
+# 方法2：手动配置 git credential helper
+git config --global credential.helper store
 ```
 
-#### 🌅 Scene Composition (场景构成)
-```yaml
-template: >
-  {primary_subject}, positioned at {composition_rule},
-  background contains {background_elements},
-  lighting from {light_direction} with {color_temperature}
+## 📝 核心能力说明
 
-# 示例:
-1girl, solo, centered framing,
-background filled with floating lanterns and cherry blossom petals,
-lighting from above-left with warm golden hour glow
-```
+### 角色原型（Character Archetypes）
+为AI智能体定义人格特征、行为模式与交互边界，实现高度一致的对话体验。
 
-#### ✨ Style Fusion (风格融合)
-```python
-def create_fusion_prompt(base_style: str, accent_style: str = None):
-    """
-    创建风格融合提示词
-    
-    Args:
-        base_style: 基础风格 (e.g., 'cyberpunk', 'watercolor')
-        accent_style: 点缀风格 (可选)
-    """
-    style_tokens = {
-        'cyberpunk': ['neon', 'synthwave', 'vaporwave'],
-        'watercolor': ['wet-on-wet', 'transparent layers', 'soft edges'],
-        'anime': ['manga-influenced', 'cel-shaded', 'character-focused']
-    }
-    
-    base = style_tokens.get(base_style, [base_style])
-    accent = style_tokens.get(accent_style, [])
-    
-    return f"{base[0]} style with {accent[0] if accent else ''} influences"
+### 场景构图（Scene Composition）
+设计多轮对话的上下文流转逻辑，确保复杂任务中的状态追踪与目标达成。
 
-# 使用示例:
-create_fusion_prompt('cyberpunk', 'watercolor')
-```
+### 风格时代适配（Style Eras）
+迁移不同历史时期的表达范式，使智能体能够跨越时空语境进行自然交互。
 
-## 🧪 实验记录 (Experiments)
+## 🔐 安全与隐私
 
-### 实验 #1: Lighting Temperature Effects
-- **变量**: Color Temperature (3200K - 7500K)
-- **发现**: Warm light (3200K) + Cool shadows = Cinematic depth
-- **结论**: 使用双色温描述比单色温提升真实感 40%
-
-### 实验 #2: Texture Reference Strategy
-- **方法**: 添加材质关键词锚定 (`rough metal`, `matte paint`) vs 通用纹理描述
-- **结果**: 明确材质词汇使渲染质量提升 35%，减少模糊错误
-
-## 📚 文档索引
-
-| 文档 | 路径 | 说明 |
-|------|------|------|
-| Prompt 设计规范 | `docs/prompt-spec.md` | Token 优先级与权重规则 |
-| TalkingArt API | `docs/api-reference.md` | 模型版本兼容性对照表 |
-| 贡献指南 | `.github/CONTRIBUTING.md` | 如何提交新提示词 |
-
-## 🤝 贡献指南
-
-### 提交新 Prompt
-1. Fork 仓库
-2. 创建 PR:
-   - 添加 `prompts/{category}/` 文件
-   - 包含：Prompt 内容、适用场景、测试结果截图
-3. CI 将自动运行质量检查
-
-### Pull Request Checklist
-- [ ] Prompt 包含至少 50% 以上原创性描述
-- [ ] 提供了清晰的 use case (使用案例) 说明
-- [ ] 包含负面提示词 (negative prompt) 建议
-- [ ] README 已更新目录结构
-
-## 📊 统计信息
-
-- **总 Prompt**: TBD (添加新文件后自动计数)
-- **覆盖风格**: 待统计
-- **实验次数**: TBD
-
-## 🔗 相关资源
-
-| 平台 | URL |
-|------|-----|
-| TalkingArt GitHub | https://github.com/NousResearch/talking-art |
-| HuggingFace Hub | https://huggingface.co/search/talkingart |
-| Stable Diffusion XL | https://stablediffusionapi.com/ |
+- 本项目不包含任何视觉内容生成能力
+- 所有提示词模块均为纯文本设计，无图像/视频依赖
+- 符合AI智能体系统的纯对话型交互需求
 
 ## 📄 License
 
-MIT License - 允许商业使用与修改，请保留版权信息。
+MIT License — See LICENSE file for details.

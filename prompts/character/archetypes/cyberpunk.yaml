@@ -1,0 +1,50 @@
+# prompts/character/archetypes/cyberpunk.yaml
+---
+type: archetype_library
+schema_version: "1.0"
+description: "Cyberpunk character prototypes with era-appropriate traits"
+
+archetype:
+  name: "Neon Rogue"
+  base_prompt: |
+    masterpiece, best quality, niji 6,
+    {hair}, {eyes}, wearing tactical gear, neon accents,
+    rain-soaked urban environment, volumetric lighting
+  
+  hair_options: [
+    "short silver with LED strips",
+    "long black braided cybernetically enhanced",
+    "mohawk with holographic paint"
+  ]
+  
+  eye_options: [
+    ["piercing green", "mechanical iris, glowing blue"],
+    "violet eyes with data-stream reflections",
+    "amber contact lenses, augmented reality overlay"
+  ]
+
+  clothing_layers: [
+    "layered tactical vest with mesh undershirt",
+    "holographic trench coat over combat gear",
+    "synthwave-patterned jacket with utility belt"
+  ]
+
+  props:
+    - "glowing katana or tech-shuriken"
+    - "modified smartphone interface"
+    - "neon-lit goggles"
+    - "hacking deck (portable computer)"
+
+  personality_traits: [
+    "cynical but idealistic",
+    "technologically illiterate but internet-savvy",
+    "street-smart, distrusts corporations",
+    "loyal to small crew or neighborhood"
+]
+
+# Extension archetypes:
+archetype_2: "Steampunk Alchemist"
+  # See prompts/character/archetypes/steampunk.yaml
+
+archetype_3: "Space Colonial Settler"  
+  # See prompts/character/archetypes/scifi.yaml

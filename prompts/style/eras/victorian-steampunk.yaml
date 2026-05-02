@@ -1,0 +1,35 @@
+# prompts/style/eras/victorian-steampunk.yaml
+---
+type: era_style
+schema_version: "1.0"
+name: "Victorian Steampunk"
+description: "Industrial age meets fantasy, combining Victorian aesthetics with mechanical technology"
+color_palette:
+  primary: ["#5C4033", "#8B7355"]
+  secondary: ["#D2691E", "#CD5C5C"]
+classification: "historical-fantasy"
+suggested_keywords: [
+  "steampunk",
+  "victorian-era",
+  "industrial-age",
+  "brass-and-leather",
+  "gas-lit technology"
+negative_keywords: [
+  "electricity",
+  "plastic",
+  "modern technology",
+  "electric power",
+  "digital displays"
+detailed_characteristics:
+  - "airships and dirigibles with ornate brass fittings"
+  - "clockwork automatons and mechanical servants"
+  - "gas lamps, candles, and coal-fired heating"
+  - "brass gears visible in machinery and clothing"
+usage_examples: [
+  "interior Victorian laboratories with steam-powered equipment",
+  "exterior airship cities built around industrial smokestacks",
+  "character designs featuring corsetry combined with mechanical limbs"
+suggested_combinations:
+  - "with oil_paint technique for realistic material textures"
+  - "with ink_sketch style for blueprint-style backgrounds"
+archetype_reference: "see prompts/character/archetypes/steampunk.yaml and prompts/character/archetypes/engineer.yaml"

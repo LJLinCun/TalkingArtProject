@@ -1,0 +1,82 @@
+# .github/workflows/lint.yml
+---
+# CI/CD Pipeline: YAML Syntax Validation & Impact Analysis
+schema_version: "1.0"
+author: TalkingArtProject Team
+license: MIT
+name: "TalkingArt Project Linting"
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'prompts/**'
+      - 'tools/**'
+      - '.github/workflows/lint.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'prompts/**'
+      - 'tools/**'
+
+jobs:
+  validate-prompts:
+    name: "Validate YAML Syntax"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+touch .python-version  # Track Python version for reproducibility
+      
+      - name: Run schema validation
+        env:
+          SCHEMA_PATH: "prompts/character/template.yaml"
+        run: |
+          cd prompts/character && python ../validate_prompts.py "$SCHEMA_PATH" || exit 1
+      
+      - name: Analyze impact (dry run)
+        if: success()
+        env:
+          TEST_PROMPT_FILE: "examples/test_01.yaml"
+        run: |
+          if [ -f "$TEST_PROMPT_FILE" ]; then
+            python ../analyze_impact.py "$TEST_PROMPT_FILE"
+          else
+            echo "No test file found, skipping analysis"
+          fi
+      
+      - name: Upload validation results
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: lint-results
+          path: |
+            prompts/
+            tools/
+          retention-days: 30
+
+  style-check:
+    name: "Code Style & Formatting"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Check YAML formatting (Prettier)
+        if: success()
+        run: |
+          npx prettier --check prompts/**/*.yaml 2>&1 || true

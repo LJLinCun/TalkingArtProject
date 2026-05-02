@@ -1,0 +1,48 @@
+# prompts/character/archetypes/engineer.yaml
+---
+type: archetype_library
+schema_version: "1.0"
+description: "Clockwork and mechanical engineer character archetypes"
+
+archetype:
+  name: "Clockwork Engineer"
+  base_prompt: |
+    masterpiece, best quality, highly detailed,
+    {hair}, {eyes}, wearing leather apron over Victorian shirt,
+    holding precision calipers or pocket watch,
+    cluttered workshop with brass instruments and blueprints
+  
+  hair_options: [
+    "messy brown tied back with cloth band",
+    "short gray, showing signs of long-term stress"
+  ]
+  
+  eye_options: [
+    ["deep brown", "safety goggles pushed up on forehead"],
+    "tired eyes reflecting schematics and blueprints"
+  ]
+
+  clothing_layers: [
+    "layered leather apron with tool pockets",
+    "Victorian waistcoat with brass buttons, epaulets",
+    "canvas trousers with heavy boots, oil stains on knees"
+  ]
+
+  props:
+    - "brass pocket watch with mechanical face"
+    - "precision calipers and measuring instruments"
+    - "pocket sketchbook filled with schematics"
+    - "workbench cluttered with gears and springs"
+
+  personality_traits: [
+    "obsessive about precision and tolerances",
+    "believes machines have souls or spirits",
+    "dislikes mass-produced parts, prefers handmade",
+    "can't sleep without hearing the clock tick"
+]
+
+# Extension archetypes:
+archetype_2: "Automaton Builder"  
+  # Similar to above but with magical/arcane mechanics
+archetype_3: "Industrial Architect"  
+  # Designs massive gears and steam-powered cities

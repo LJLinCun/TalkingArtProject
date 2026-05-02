@@ -1,0 +1,48 @@
+# prompts/character/archetypes/scifi.yaml
+---
+type: archetype_library
+schema_version: "1.0"
+description: "Science fiction character archetypes for space and colony settings"
+
+archetype:
+  name: "Space Colonial Settler"
+  base_prompt: |
+    masterpiece, best quality, highly detailed,
+    {hair}, {eyes}, wearing modular environmental suit with visible cooling vents,
+    holding datapad or environmental monitoring device,
+    colony habitat interior with viewscreens showing alien planets
+  
+  hair_options: [
+    "short practical style tied back for safety",
+    "synthetic hair extensions, silver-gray"
+  ]
+  
+  eye_options: [
+    ["pale blue from oxygen deprivation", "contact lenses with data overlays"],
+    "tired eyes showing signs of jet lag and radiation exposure"
+  ]
+
+  clothing_layers: [
+    "modular environmental suit with cooling tubes",
+    "practical boots with magnetic soles, heavy utility belt",
+    "personal spacesuit pockets filled with emergency rations"
+  ]
+
+  props:
+    - "environmental monitoring device with holographic display"
+    - "emergency oxygen canister"
+    - "datapad showing colony schematics and terraforming progress"
+    - "portable hydroponic grow light for personal plants"
+
+  personality_traits: [
+    "technologically illiterate but internet-savvy",
+    "disappointed by corporate overpromises about Earth",
+    "garden enthusiast in a sterile environment",
+    "believes every rock on the planet has secrets to keep"
+]
+
+# Extension archetypes:
+archetype_2: "Cybernetics Technician"  
+  # Maintains medical cybernetics and prosthetics
+archetype_3: "Xeno-Archaeologist"  
+  # Studies alien cultures and artifacts, not just technology

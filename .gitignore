@@ -1,3 +1,5 @@
+# .gitignore
+---
 # Python
 __pycache__/
 *.py[cod]
@@ -21,265 +23,47 @@ stage/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-
+MANIFEST*
 # Virtual environments
-venv/ENV/
-.env
-.venv/
+venv/
+virtenv/
+ENV/
 env/
-.pytest_cache/
-.hypothesis/
-.mypy_cache/
-rubocop_cache/
-
-# IDE / Editors
+.venv/
+.env
+# IDE
 .idea/
-.vscode/settings.json
-.swm/
-project.cache/
-.project
-.classpath
-.settings/
+.vscode/
 *.swp
 *.swo
 *~
 .DS_Store
-._*
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-osenv/,.coverage
-.coverage.hiding
+.project
+.pydevproject
 .pytest_cache/
-.coverage_report
-htmlcov/
-.nox/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-database.sqlite
-*.db
-backup.sql
-
-# Flask stuff
-instance/.gitkeep
-.webassets-cache
-
-# Scrapy logs
-downloader.log
-scrapy.log
-
-# Sphinx
-docs/_build/
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 8 / flake8
-.tox/
-.coverage
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.flake8.cache
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-build/
-develop-eggs/
-dist/
-download/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-opkg/
-stage/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-.build/
-*.manifest
-*.spec
-
-cache/
-.cache
-.tmp
-
-# Spyder projects
-projects/
-.spyproject/
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-osenv/
-tox/
-.nox/
-.coverage
-.coverage.*
-osenv/
-.hypothesis/
-.pytest_cache/
-mypy_cache/
-rubocop_cache/
-.clover.xml
-
-# Ruff cache
-.ruff_cache/
-
-# Celery
-.celerybeat-schedule
-celerybeat.pid
-
-# Sphinx
-*.doctrees
-
-# mypy
 .mypy_cache/
-db.db
-*.dpkg-new
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# pytest
-.pytest_cache/
-
-# Coverage
+.ruff_cache/
 .coverage
-coverage.xml
 htmlcov/
-osenv/
-tox/
-.nox/
-
-# flake8
 .tox/
-.coverage
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.flake8.cache
-
-# Django
-.log
-db.sqlite3
-database.sqlite
-*.db
-backup.sql
-
-# Flask
-instance/.gitkeep
-.webassets-cache
-
-# Scrapy logs
-downloader.log
-scrapy.log
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-build/
-develop-eggs/
-dist/
-download/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-opkg/
-stage/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-build/
-develop-eggs/
-dist/
-download/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-opkg/
-stage/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+.nox/
+.pytype/
+# ML/AI models and datasets (large files)
+models/
+datasets/
+cache/
+outputs/
+gen_images/
+generated_videos/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+.onnx_data/
+# TalkingArtProject specific (optional but recommended)
+examples/*.png
+experiments/*.mp4
+experiments/*.webp
+tools/__pycache__/

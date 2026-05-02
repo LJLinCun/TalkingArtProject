@@ -1,0 +1,40 @@
+# prompts/scene/composition.yaml
+---
+type: composition_rules
+schema_version: "1.0"
+description: "Scene composition and framing guidelines for talkingart project"
+
+rule:
+  golden_ratio:
+    name: "Golden Ratio / Golden Mean"
+    phi_value: 1.61803398875
+    description: "Place subject at intersection of grid lines based on Fibonacci sequence"
+    application:
+      - "Portrait placement in landscape frames"
+      - "Horizon line position for dramatic sky shots"
+      - "Object grouping in cityscapes"
+  
+  rule_of_thirds:
+    name: "Rule of Thirds (Simplified)"
+    description: "Divide frame into thirds, place key elements at intersections">
+    vertical_division: "Left-right thirds for landscape composition"
+    horizontal_division: "Top-bottom thirds for portrait orientation"
+
+# Camera Settings (prompts/scene/camera-angles.yaml)
+camera:
+  standard_portrait:
+    focal_length: "85mm on full frame, ~50mm crop sensor"
+    characteristics: ["natural perspective", "compressed background"]
+  
+  wide_angle: ["24mm or less", "distorted periphery", "expanded field of view"]
+
+# Lighting Integration (lighting/color-temp.yaml)
+color_temperature:
+  warm: "3200K, sunset glow, golden hour"
+  neutral: "4500K, fluorescent office light"
+  cool: "6500K, moonlight, cold steel"
+
+# Volumetric Effects (prompts/lighting/volumetric.py)
+volumetric:
+  rain_lightning: ["rain and lightning effects", "cyberpunk atmospheres"]
+  dust_motes: ["dust particles visible in light beams"]

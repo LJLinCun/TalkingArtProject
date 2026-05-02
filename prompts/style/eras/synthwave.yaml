@@ -1,0 +1,37 @@
+# prompts/style/eras/synthwave.yaml
+---
+type: era_style
+schema_version: "1.0"
+name: "Synthwave / Retro-Futurism"
+description: "80s-inspired neon aesthetic combining vintage technology with futuristic vision"
+color_palette:
+  primary: ["#FF6B9D", "#4A5F7C"]
+  secondary: ["#FFE5D9", "#E0FFFF"]
+classification: "retro-futuristic"
+suggested_keywords: [
+  "synthwave",
+  "retro-futurism",
+  "neon-noir",
+  "vaporwave",
+  "cyberpunk-80s"
+negative_keywords: [
+  "photorealistic",
+  "3d render",
+  "cgi",
+  "ugly",
+  "duplicate"
+]
+detailed_characteristics:
+  - "neon-lit urban environments with grid lines in background"
+  - "hacked digital interfaces and CRT monitor aesthetics"
+  - "grainy film stock aesthetic (VHS quality)"
+  - "sunset gradients transitioning to night sky"
+usage_examples: [
+  "nighttime cityscapes with flying cars",
+  "character designs featuring retro-futuristic technology",
+  "interior spaces dominated by neon signage and computer monitors"
+]
+suggested_combinations:
+  - "with oil_paint technique for textured surfaces"
+  - "with pixel_art for character sprites or game-style backgrounds"
+archetype_reference: "see prompts/character/archetypes/cyberpunk.yaml"

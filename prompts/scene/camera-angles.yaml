@@ -1,0 +1,64 @@
+# prompts/scene/camera-angles.yaml
+---
+type: camera_parameters
+schema_version: "1.0"
+description: "Camera angle parameters for scene composition and cinematography control"
+
+# Camera Angle Definitions
+angle:
+  low_angle:
+    description: "View from below, looking up at subject (hero shots, oppression)">
+    elevation: -30 to -45 degrees
+    lens_recommendation: "70-200mm zoom or fisheye"
+    use_cases: ["hero entrance", "intimidation", "god-like perspective"]
+  
+  birdseye:
+    description: "Top-down view (strategic views, cityscapes, maps)">
+    elevation: 75 to 90 degrees
+    lens_recommendation: "wide angle or drone shots"
+    use_cases: ["battlefield overview", "city planning", "pattern recognition"]
+  
+  over_the_shoulder:
+    description: "View from behind subject's shoulder (dialogue scenes)">
+    elevation: Slight offset, eye-level or slightly above
+    lens_recommendation: "50mm portrait lens"
+    use_cases: ["conversations", "intimate moments", "storytelling"]
+  
+  wormseye:
+    description: "Extreme low angle (hero worship, vulnerability)">
+    elevation: Below eye level
+    lens_recommendation: "wide-angle or tilt-shift"
+    use_cases: ["villain shots", "subservient perspective"]
+
+# Composition Rules
+composition:
+  golden_ratio:
+    description: "Golden section / Golden mean (phi = 1.618)">
+    application: "Place subject at intersection of grid lines"
+    rule_of_thirds_relationship: "Simplified for practical use"
+  
+  rule_of_thirds:
+    description: "Divide frame into thirds, place key elements at intersections">
+    horizontal_division: "Left-right thirds"
+    vertical_division: "Top-bottom thirds"
+
+# Lens Characteristics (can be combined with angles)
+lens:
+  wide_angle:
+    focal_length: "24mm or less"
+    characteristics: ["distorted periphery", "expanded field of view"]
+  
+  standard_portrait:
+    focal_length: "85mm on full frame, ~50mm crop sensor">
+    characteristics: ["natural perspective", "compressed background"]
+
+# Volumetric Lighting (scene/lighting/volumetric.py)
+volumetric:
+  rain_lightning:
+    description: "Rain and lightning effects for cyberpunk atmospheres"
+    color_temperature: "5600K daylight mixed with storm gray"
+    particle_size: "Small droplets catching light from sources"
+  
+  dust_motes:
+    description: "Dust particles visible in light beams"
+    works_with: ["low-angle", "side lighting"]

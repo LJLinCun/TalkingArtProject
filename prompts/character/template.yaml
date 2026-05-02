@@ -1,0 +1,82 @@
+# prompts/character/template.yaml
+---
+type: character_design
+schema_version: "1.0"
+author: TalkingArtProject
+license: MIT
+
+# Schema Definition (YAML Frontmatter)
+prompt:
+  # Core Identity
+  subject: "{name}, {age} years old",
+  
+  # Appearance Attributes (每个字段用逗号分隔多个描述词)
+  appearance:
+    hair: [color, length, style, accessories]
+    eyes: [shape, color, expression, makeup]
+    clothing: [era_style, modern_elements, layers, accessories]
+    skin_tone: [base_color, marks, jewelry]
+
+  # Setting & Atmosphere
+  setting:
+    environment: {type, time_of_day, weather}
+    location: {landmark, urban_or_rural, specific_details}
+  
+  # Mood & Composition
+  mood:
+    atmosphere: [lighting_quality, color_palette]
+    emotion: [body_language, facial_expression, props]
+
+# Standard Techniques (Quality Multipliers)
+techniques:
+  - "masterpiece"
+  - "best quality"
+  - "highly detailed"
+  - "intricate details"
+  # Add model-specific tags if needed:
+  # - "niji 6"          # NijiJourney (anime style)
+  # - "sd_xl_base"      # Stable Diffusion XL base
+  # - "flux.1-dev"     # Flux Dev for text rendering
+
+# Negative Prompts (avoid these keywords)
+negative_prompt:
+  default: [
+    "lowres", "bad anatomy", "disfigured", "extra digits",
+    "missing fingers", "mutated hands", "poorly drawn hands",
+    "poorly drawn face", "fusion", "malformed feet",
+    "elongated fingers", "long neck", "blurry", "jagged",
+    "morbid", "body out of proportion", "bad proportions",
+    "worst quality", "low quality", "normal quality"
+  ]
+  # Model-specific negative prompts:
+  niji_negative: [
+    "3d", "photorealistic", "cgi", "pencil sketch",
+    "ugly", "duplicate", "monochrome"
+  ]
+
+# Usage Examples (填写后的完整提示词示例)
+examples:
+  basic_portrait: |
+    masterpiece, best quality, highly detailed,
+    1girl, solo, long brown hair, blue eyes,
+    wearing school uniform with floral accessories,
+    cherry blossom background, soft sunlight,
+    gentle smile, shy expression
+
+  cyberpunk_ninja: |
+    masterpiece, best quality, niji 6:
+    1boy, solo, short black hair, glowing red eyes,
+    wearing tactical gear with neon accents,
+    rain-soaked alleyway at night, volumetric lighting,
+    holding katana, serious expression
+
+# Extension Points (可选的扩展字段)
+extensions:
+  # For character sheet generation
+  reference_sheet: |
+    turn around, full body, neutral expression,
+    hands in neutral position, multiple angles
+  
+  # For animation/pose control
+  pose_reference: |
+    standing pose, arms relaxed, weight on back leg
